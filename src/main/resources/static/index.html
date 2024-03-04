@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.4.15/dist/vue.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.2/dist/markdown-it.min.js"></script>
+  <script
+      src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <script
+      src="https://cdn.jsdelivr.net/npm/markdown-it-sup@2.0.0/dist/markdown-it-sup.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/element-plus@2.5.6/dist/index.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/uuid-random@1.3.2/index.min.js"></script>
+
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/tomorrow-night-blue.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2.5.6/dist/index.min.css">
+  <title>Chat Bot</title>
+</head>
+<body style="margin:0;">
+<div id="app">
+  <div class="chat-root">
+    <div class="header">Bing Chat</div>
+    <div class="content">
+      <div v-for="(item, index) in msg" :key="index" class="round">
+        <div class="send">
+          <div class="avatar user-avatar" v-if="item.send"></div>
+          <div class="bubble" v-if="item.send">{{ item.send }}</div>
+        </div>
+        <div class="back">
+          <div class="avatar robot-avatar"></div>
+          <div class="bubble back-bubble">
+            <div v-if="item.loading" class="loading-container">
+              <div class="loading-spinner"></div>
+            </div>
+            <span v-else-if="item.back">
+              <span v-html="formatBack(item.back)" :id="'item_'+item.id"></span>
+              <svg class="copy-back" viewBox="64 64 896 896" fill="currentColor" @click="copyText"
+                   data-clipboard-action="copy" :data-clipboard-target="'#item_'+item.id">
+                <path
+                    d="M832 64H296c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h496v688c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8V96c0-17.7-14.3-32-32-32zM704 192H192c-17.7 0-32 14.3-32 32v530.7c0 8.5 3.4 16.6 9.4 22.6l173.3 173.3c2.2 2.2 4.7 4 7.4 5.5v1.9h4.2c3.5 1.3 7.2 2 11 2H704c17.7 0 32-14.3 32-32V224c0-17.7-14.3-32-32-32zM350 856.2L263.9 770H350v86.2zM664 888H414V746c0-22.1-17.9-40-40-40H232V264h432v624z">
+                </path>
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <input type="text" v-model="text" @keyup.enter="sendText" placeholder="Ask me anything...">
+      <button @click="sendText">send</button>
+    </div>
+  </div>
+</div>
+<script>
+const md = new markdownit({
+  linkify: false,
+  langPrefix: 'language-',
+  breaks: true,
+  html: true,
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        const uid = uuid();
+        return '<div style="position: relative;color:white">' +
+          '<svg class="copy-back" viewBox="64 64 896 896" fill="currentColor" onclick="jsCopyText()" data-clipboard-action="copy" data-clipboard-target="#item_'
+          + uid + '">' +
+          '<path d="M832 64H296c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h496v688c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8V96c0-17.7-14.3-32-32-32zM704 192H192c-17.7 0-32 14.3-32 32v530.7c0 8.5 3.4 16.6 9.4 22.6l173.3 173.3c2.2 2.2 4.7 4 7.4 5.5v1.9h4.2c3.5 1.3 7.2 2 11 2H704c17.7 0 32-14.3 32-32V224c0-17.7-14.3-32-32-32zM350 856.2L263.9 770H350v86.2zM664 888H414V746c0-22.1-17.9-40-40-40H232V264h432v624z">'
+          +
+          '</path></svg></div>' +
+          '<pre class="hljs" id="item_' + uid + '"><code>' + hljs.highlight(lang, str, true).value
+          + '</code></pre>';
+      } catch (__) {
+        console.error('height error:', __);
+      }
+    }
+    return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
+  }
+});
+
+// 注册插件
+md.use(window.markdownitSup);
+const { createApp } = Vue
+createApp({
+  data () {
+    return {
+      msg: [{
+        id: "d4bb5078-fee9-4a3b-9621-189b665193c6",
+        send: "",
+        back: "Hello，this is Bing，How can I help？😊",
+        loading: false,
+      }],
+      text: "",
+    }
+  },
+  methods: {
+    copyText () {
+      jsCopyText();
+    },
+    formatBack (text) {
+      return md.render(text);
+    },
+    sendText () {
+      if (!this.text) {
+        return;
+      }
+      const id = uuid();
+      const msg = {
+        id: id,
+        send: this.text,
+        back: "",
+        loading: true,
+      }
+      this.msg.push(msg);
+      const data = {
+        "prompt": this.text,
+      };
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/v1/chat/completions');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify(data));
+      xhr.onreadystatechange = function () {
+        this.$nextTick(() => {
+          this.scrollToBottom();
+        });
+        let msg = '';
+        if (xhr.status === 200) {
+          if (xhr.readyState === xhr.LOADING) {
+            const chunks = xhr.responseText.split('\r\n');
+            chunks.forEach(chunk => {
+              if (chunk.trim() !== '') {
+                msg = msg + chunk;
+              }
+            });
+
+            if (msg !== '') {
+              for (const item of this.msg) {
+                if (item.id === id) {
+                  item.loading = false;
+                  item.back = msg;
+                  break;
+                }
+              }
+            }
+          }
+          if (xhr.readyState === xhr.DONE) {
+            console.log("done。")
+          }
+        }
+      }.bind(this);
+      xhr.onerror = function (error) {
+        for (const item of this.msg) {
+          if (item.id === id) {
+            item.loading = false;
+            item.back = "网络异常！";
+          }
+        }
+        console.error('error：', error);
+      };
+      this.text = '';
+    },
+    scrollToBottom () {
+      const content = this.$el.querySelector('.content');
+      content.scrollTop = content.scrollHeight;
+    }
+  }
+}).mount('#app');
+
+function jsCopyText () {
+  const clipboard = new ClipboardJS('.copy-back');
+
+  clipboard.on('success', function (e) {
+    ElementPlus.ElMessage({
+      message: '<span style="font-size: 18px;color:#3498db">copy success！</span>',
+      type: 'success',
+      customClass: 'custom-message',
+      duration: 2000,
+      dangerouslyUseHTMLString: true
+    })
+    e.clearSelection();
+    clipboard.destroy();
+  });
+
+  clipboard.on('error', function (e) {
+    ElementPlus.ElMessage({
+      message: '<span style="font-size: 18px;color:#ff0000">copy error！</span>',
+      type: 'error',
+      duration: 2000,
+      customClass: 'custom-message'
+    })
+    e.clearSelection();
+    clipboard.destroy();
+  });
+}
+</script>
+</body>
+<style>
+  .chat-root {
+    height: 100vh;
+    background-color: #eeeeee;
+    display: flex;
+    flex-direction: column;
+    font-size: 1.1rem;
+  }
+
+  .header {
+    color: #333;
+    padding: 10px;
+    box-shadow: 0 1px 2px #ddd;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    font-size: x-large;
+  }
+
+  .content {
+    height: 100%;
+    overflow-y: scroll;
+  }
+
+  .bubble {
+    display: block;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px;
+    max-width: 95%;
+    overflow-wrap: break-word;
+    text-align: left;
+    font-size: large;
+  }
+
+  .send {
+    text-align: right;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .back-bubble {
+    background-color: #ADD8E6;
+    position: relative;
+  }
+
+  .back {
+    max-width: 95%;
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .footer {
+    display: flex;
+    position: sticky;
+    bottom: 0;
+    padding: 5px;
+    background-color: #eeeeee;
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    font-size: 1.1rem;
+  }
+
+  button {
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.1rem;
+    margin-left: 5px;
+  }
+
+  p {
+    margin: 10px 40px 1px 1px;
+    font-size: medium;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+    background-size: cover;
+    border-radius: 40%;
+    margin-top: 23px;
+  }
+
+  .user-avatar {
+    background-image: url('images/user-32x32.png');
+  }
+
+  .robot-avatar {
+    background-image: url('images/bing-32x32.png');
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+
+  .loading-spinner {
+    border: 4px solid #3498db;
+    border-top: 4px solid #f3f3f3;
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    animation: spin 1s linear infinite;
+  }
+
+  pre code {
+    font-size: x-large;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .copy-back {
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+</style>
+</html>
