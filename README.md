@@ -28,10 +28,16 @@ subdomains are included in proxy rules.**
 java -jar BingChat-1.0.0.jar
 ```
 
+![Program Demo](https://github.com/xiaotao-xiaotao/BingChat/blob/main/video.gif)
+
 ## Screenshot
 
 <img width="601" src="./screenshot.png" alt="BingChat Screenshot">
 
+![Program Demo](https://github.com/xiaotao-xiaotao/BingChat/blob/main/video.gif)
+
 ## License
 
 Apache-2.0 License
+
+
