@@ -30,9 +30,13 @@ java -jar BingChat-1.0.0.jar
 
 ## Screenshot
 
-<img width="601" src="./screenshot.png" alt="BingChat Screenshot">
+<img width="601" src="./screenshot.png" alt="screenshot">
 
 ![Program Demo](https://github.com/xiaotao-xiaotao/BingChat/blob/main/video.gif)
+
+## Contact us
+
+<img width="301" src="https://vip.gptchatclub.com/attachments/square/wechat.png" alt="contact">
 
 ## License
 
