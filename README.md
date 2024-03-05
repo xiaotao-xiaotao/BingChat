@@ -40,6 +40,7 @@ java -jar BingChat-1.0.0.jar
   <img style="margin-right: 20px;" width="160" src="./qq.png" alt="qq contact">
   <img width="160" src="https://vip.gptchatclub.com/attachments/square/wechat.png" alt="wechat contact">
 </div>
+
 ## License
 
 Apache-2.0 License
