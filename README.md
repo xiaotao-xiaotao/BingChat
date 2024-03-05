@@ -30,15 +30,16 @@ java -jar BingChat-1.0.0.jar
 
 ## Screenshot
 
-<img width="601" src="./screenshot.png" alt="screenshot">
+<img width="101" src="./screenshot.png" alt="screenshot">
 
 ![Program Demo](https://github.com/xiaotao-xiaotao/BingChat/blob/main/video.gif)
 
 ## Contact us
 
-<img width="201" src="./qq.png" alt="qq contact">
-<img width="201" src="https://vip.gptchatclub.com/attachments/square/wechat.png" alt="wechat contact">
-
+<div style="display: flex;justify-content: space-between;">
+  <img style="margin-right: 20px;" width="201" src="./qq.png" alt="qq contact">
+  <img width="201" src="https://vip.gptchatclub.com/attachments/square/wechat.png" alt="wechat contact">
+</div>
 ## License
 
 Apache-2.0 License
