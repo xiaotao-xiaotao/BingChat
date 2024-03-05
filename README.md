@@ -36,7 +36,8 @@ java -jar BingChat-1.0.0.jar
 
 ## Contact us
 
-<img width="101" src="https://vip.gptchatclub.com/attachments/square/wechat.png" alt="contact">
+<img width="201" src="./qq.png" alt="qq contact">
+<img width="201" src="https://vip.gptchatclub.com/attachments/square/wechat.png" alt="wechat contact">
 
 ## License
 
