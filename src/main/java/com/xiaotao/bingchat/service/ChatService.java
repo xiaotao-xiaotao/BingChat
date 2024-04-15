@@ -118,7 +118,6 @@ public class ChatService {
         return;
       }
 
-      log.info("bing request：{}", bingConversationReq);
       Request request = buildRequest(
           String.format(Constants.CONVERSATION_CHAT_URL, URLUtil.encodeAll(conversationSignature)),
           response.getCookies(), cookie);
