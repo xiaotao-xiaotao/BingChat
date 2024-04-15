@@ -83,7 +83,6 @@ public class ChatService {
     }
 
     public void completions(String prompt) throws Exception {
-      String traceId = IdUtil.fastSimpleUUID();
       String cookie = String.format(basicConfig.getCookie(), DateUtil.currentSeconds());
       HttpResponse response = getConversationSignature(cookie);
       if (ObjectUtil.isNull(response) || StrUtil.isEmpty(response.body())) {
@@ -112,12 +111,14 @@ public class ChatService {
         log.error("Bing parse conversationRes error：{}", e.getMessage(), e);
         return;
       }
-      String bingConversationReq = buildConversationReq(traceId,
+      String bingConversationReq = buildConversationReq(
           bingConversationRes.getConversationId(), bingConversationRes.getClientId(), prompt);
       if (StrUtil.isEmpty(bingConversationReq)) {
         ServletUtils.renderString(servletResponse, "Build conversation request failed！");
         return;
       }
+
+      log.info("bing request：{}", bingConversationReq);
       Request request = buildRequest(
           String.format(Constants.CONVERSATION_CHAT_URL, URLUtil.encodeAll(conversationSignature)),
           response.getCookies(), cookie);
@@ -180,12 +181,11 @@ public class ChatService {
               }
             } catch (Exception e) {
               log.error("Failed to obtain more information：{}", e.getMessage(), e);
+            } finally {
+              log.info("Send done");
+              webSocket.send("{\"type\":7}" + "\u001E");
+              webSocket.close(1000, "Goodbye, Bing!");
             }
-
-          } else if (bingCompletionRes.getType() == 2) {
-            webSocket.close(1000, "Goodbye, Bing!");
-          } else if (bingCompletionRes.getType() == 3) {
-            webSocket.close(1000, "Goodbye, Bing!");
           }
         }
 
@@ -227,7 +227,7 @@ public class ChatService {
       return new Request.Builder()
           .get()
           .url(url)
-          .addHeader(Header.ACCEPT_ENCODING.getValue(), "gzip, deflate, br")
+          .addHeader(Header.ACCEPT_ENCODING.getValue(), "gzip, deflate, br, zstd")
           .addHeader(Header.ACCEPT_LANGUAGE.getValue(), "en")
           .addHeader(Header.CACHE_CONTROL.getValue(), "no-cache")
           .addHeader(Header.PRAGMA.getValue(), "no-cache")
@@ -251,11 +251,12 @@ public class ChatService {
         }
         Map<String, String> param = MapUtil.newHashMap();
         param.put(Header.REFERER.getValue(),
-            "https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx");
+            "https://www.bing.com/chat?q=Bing+AI&FORM=hpcodx&showconv=1&toWww=1&redig="
+                + IdUtil.fastSimpleUUID().toUpperCase());
         param.put(Header.USER_AGENT.getValue(), basicConfig.getUserAgent());
         param.put("X-Ms-Client-Request-Id", IdUtil.fastUUID());
         param.put("X-Ms-Useragent",
-            "azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.12.0 OS/Windows");
+            "azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.15.1 OS/Windows");
         response = HttpRequest.get(
                 String.format(Constants.CONVERSATION_SIGNATURE_URL, basicConfig.getBundleVersion()))
             .setProxy(proxy)
@@ -269,9 +270,10 @@ public class ChatService {
       return response;
     }
 
-    private String buildConversationReq(String traceId, String conversationId,
+    private String buildConversationReq(String conversationId,
         String clientId, String prompt) {
-      return conversationReqJson.replace("$trace_id", traceId)
+      return conversationReqJson.replace("$plugin_id", IdUtil.fastUUID())
+          .replace("$trace_id", IdUtil.fastSimpleUUID())
           .replace("$request_id", IdUtil.fastUUID())
           .replace("$timestamp",
               DateUtil.format(DateUtil.date(), DatePattern.UTC_WITH_XXX_OFFSET_PATTERN))

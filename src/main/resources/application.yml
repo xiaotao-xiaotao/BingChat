@@ -17,8 +17,8 @@ basic:
   proxy-enabled: true
   proxy-ip: 192.168.1.98
   proxy-port: 7890
-  cookie: _U=需要替换成你账号的cookie; SRCHHPGUSR=SRCHLANG=zh-Hans&HV=%s
+  cookie: _U=需要替换成你账号的cookie; SRCHHPGUSR=SRCHLANG=en&HV=%s
   user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0
-  bundle-version: 1.1622.0
+  bundle-version: 1.1688.0
 
 
