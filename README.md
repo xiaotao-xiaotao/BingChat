@@ -18,7 +18,7 @@
 ## Usage
 
 - Sign in to your Microsoft account
-- GET https://www.bing.com/turing/conversation/create?bundleVersion=1.1622.0 Request Cookie，Find **_
+- GET https://www.bing.com/turing/conversation/create?bundleVersion=1.1688.0 Request Cookie，Find **_
   U** parameter in cookie and replace **_U** in application.yml
 
 **Note: VPN is required if new Bing is not available in your area. Make sure `bing.com` and its
