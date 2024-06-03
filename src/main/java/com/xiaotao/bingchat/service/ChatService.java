@@ -271,7 +271,7 @@ public class ChatService {
 
     private String buildConversationReq(String conversationId,
         String clientId, String prompt) {
-      return conversationReqJson.replace("$plugin_id", IdUtil.fastUUID())
+      return conversationReqJson.replace("$plugin_id", "c310c353-b9f0-4d76-ab0d-1dd5e979cf68")
           .replace("$trace_id", IdUtil.fastSimpleUUID())
           .replace("$request_id", IdUtil.fastUUID())
           .replace("$timestamp",
