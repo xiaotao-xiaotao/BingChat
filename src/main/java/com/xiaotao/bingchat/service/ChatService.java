@@ -83,7 +83,8 @@ public class ChatService {
     }
 
     public void completions(String prompt) throws Exception {
-      String cookie = String.format(basicConfig.getCookie(), DateUtil.currentSeconds());
+      String cookie = String.format(basicConfig.getCookie(), DateUtil.currentSeconds(),
+          basicConfig.getBundleVersion());
       HttpResponse response = getConversationSignature(cookie);
       if (ObjectUtil.isNull(response) || StrUtil.isEmpty(response.body())) {
         ServletUtils.renderString(servletResponse, "Failed to obtain conversation key！");
@@ -250,12 +251,12 @@ public class ChatService {
         }
         Map<String, String> param = MapUtil.newHashMap();
         param.put(Header.REFERER.getValue(),
-            "https://www.bing.com/chat?q=Bing+AI&FORM=hpcodx&showconv=1&toWww=1&redig="
-                + IdUtil.fastSimpleUUID().toUpperCase());
+            "https://www.bing.com/chat?q=Microsoft+Copilot&FORM=hpcodx&wlexpsignin=1");
+
         param.put(Header.USER_AGENT.getValue(), basicConfig.getUserAgent());
         param.put("X-Ms-Client-Request-Id", IdUtil.fastUUID());
         param.put("X-Ms-Useragent",
-            "azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.15.1 OS/Windows");
+            "azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.16.0 OS/Windows");
         response = HttpRequest.get(
                 String.format(Constants.CONVERSATION_SIGNATURE_URL, basicConfig.getBundleVersion()))
             .setProxy(proxy)
